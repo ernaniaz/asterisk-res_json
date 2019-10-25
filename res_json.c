@@ -15,33 +15,26 @@
  * the GNU General Public License Version 2. See the LICENSE file
  * at the top of the source tree.
  *
- * Please follow coding guidelines 
+ * Please follow coding guidelines
  * http://svn.digium.com/view/asterisk/trunk/doc/CODING-GUIDELINES
  */
 
 /*! \file
  *
- * \brief JSONPRETTY() formats a json document for easy read
- * \brief JSONCOMPRESS() formats a json document for minimal footprint
- * \brief JSONELEMENT() get element at path from a json document
- * \brief jsonvariables sets a list of variables from a single-level json document
- * \brief jsonadd add an element at path in a json document
- * \brief jsonset set value of an element at path in a json document
- * \brief jsondelete delete element at path from a json document
+ * \brief JSON string manipulation functions and applications
  *
- * \author\verbatim Radu Maierean <radu dot maierean at gmail> \endverbatim
- * 
+ * \author Radu Maierean <radu.maierean@gmail.com>
+ *
+ * \ingroup functions
  * \ingroup applications
  */
 
 /*** MODULEINFO
 	<defaultenabled>yes</defaultenabled>
-	<support_level>core</support_level>
+	<support_level>extended</support_level>
  ***/
 
 #include "asterisk.h"
-
-ASTERISK_FILE_VERSION(__FILE__, "$Revision: 200656 $")
 
 #include "asterisk/file.h"
 #include "asterisk/channel.h"
@@ -52,185 +45,185 @@ ASTERISK_FILE_VERSION(__FILE__, "$Revision: 200656 $")
 #include "asterisk/cJSON.h"
 
 /*** DOCUMENTATION
-	<function name="JSONPRETTY" language="en_US">
+	<function name="JSONPRETTY" language="en_US" module="res_json">
 		<synopsis>
-			nicely formats a json string for printing
-		</synopsis>	
+			Nicely formats a JSON string for printing.
+		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the json struct</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>nicely formats a json string for printing. cosmetic functionality only.</para>
+			<para>Nicely formats a JSON string for printing. cosmetic functionality only.</para>
 		</description>
 	</function>
-	<function name="JSONCOMPRESS" language="en_US">
+	<function name="JSONCOMPRESS" language="en_US" module="res_json">
 		<synopsis>
-			formats a json string for minimum footprint
-		</synopsis>	
+			Formats a JSON string for minimum footprint.
+		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>formats a json string for minimum footprint (eliminates all unnecessary 
-			characters). cosmetic functionality only.</para>
+			<para>Formats a JSON string for minimum footprint (eliminates all unnecessary
+			characters). Cosmetic functionality only.</para>
 		</description>
 	</function>
-	<function name="JSONELEMENT" language="en_US">
+	<function name="JSONELEMENT" language="en_US" module="res_json">
 		<synopsis>
-			gets the value of an element at a given path in a json document
-		</synopsis>	
+			Gets the value of an element at a given path in a JSON document.
+		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 			<parameter name="path" required="true">
-				<para>path to where the element were looking for (like "/path/to/element", or 
+				<para>Path to where the element were looking for (like "/path/to/element", or
 				"/path/to/element/3" to identify the element with index 3 in an array)</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>returns the value of an element at the given path. the element type is returned 
+			<para>Returns the value of an element at the given path. The element type is returned
 			in the dialplan variable JSONTYPE.</para>
 		</description>
 	</function>
-	<application name="jsonvariables" language="en_US">
+	<application name="JSONVariables" language="en_US" module="res_json">
 		<synopsis>
-			parse a single-level json structure (key-value pairs) as dialplan variables
+			Parse a single-level JSON structure (key-value pairs) as dialplan variables.
 		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>considers that the json string offered as input is a list of key-value pairs; 
+			<para>Considers that the JSON string offered as input is a list of key-value pairs;
 			associates each key with an asterisk variable name, and sets the value for it.</para>
-			<para>depending on the type of the json variable, the values are:</para>
+			<para>Depending on the type of the JSON variable, the values are:</para>
 			<para>   True, False: 1, 0</para>
 			<para>   NULL: (resulting variable contains an empty string)</para>
-			<para>   Number, String: the number or the string</para>
+			<para>   Number, String: The number or the string</para>
 			<para>   Array: !array! (literal)</para>
-			<para>   Object: string, the json representation of the underlying object</para>
-			<para>note that this is mainly intended for simple key-value lists; if you have 
-			variables that are arrays or objects, things may get screwed up because of the 
+			<para>   Object: String, the JSON representation of the underlying object</para>
+			<para>Note that this is mainly intended for simple key-value lists; if you have
+			variables that are arrays or objects, things may get screwed up because of the
 			separators and braces...</para>
 		</description>
 		<see-also>
 			<ref type="application">jsonelement</ref>
 		</see-also>
 	</application>
-	<application name="jsonadd" language="en_US">
+	<application name="JSONAdd" language="en_US" module="res_json">
 		<synopsis>
-			adds a new element in a json document
+			Adds a new element in a JSON document.
 		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 			<parameter name="path" required="true">
-				<para>path to where the element will be added (like "/path/to/element", or 
-				"/path/to/element/3" to identify the element with index 3 in an array); if empty, 
+				<para>Path to where the element will be added (like "/path/to/element", or
+				"/path/to/element/3" to identify the element with index 3 in an array); if empty,
 				the element becomes the root element</para>
 			</parameter>
 			<parameter name="type" required="true">
-				<para>type of element to be added: bool, null, number, string or array</para>
+				<para>Type of element to be added: bool, null, number, string or array</para>
 			</parameter>
 			<parameter name="name" required="true">
-				<para>name of element to be added; if adding to an array element, the new element is 
+				<para>Name of element to be added; if adding to an array element, the new element is
 				appended and the name is ignored</para>
 			</parameter>
 			<parameter name="value" required="true">
-				<para>the actual value; ignored if adding null-type elements; for bool type elements 
-				any of the following 0, n, no, f, false or empty string (case insensitive) are 
+				<para>The actual value; ignored if adding null-type elements; for bool type elements
+				any of the following 0, n, no, f, false or empty string (case insensitive) are
 				considered false, anything else is considered true</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>the first parameter is interpreted as a variable name, and its contents is 
-			considered to be a json document. the json document is parsed and the path is followed 
-			to the insertion point. a new element of the given type, with the given name and value 
-			is created, then added to the element at the end of the path (or appended, if the element 
-			at the end of the path is an array). the contents of the json document variable is 
+			<para>The first parameter is interpreted as a variable name, and its contents is
+			considered to be a JSON document. The JSON document is parsed and the path is followed
+			to the insertion point. A new element of the given type, with the given name and value
+			is created, then added to the element at the end of the path (or appended, if the element
+			at the end of the path is an array). The contents of the JSON document variable is
 			updated to reflect the element added.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonset</ref>
-			<ref type="application">jsondelete</ref>
+			<ref type="application">JSONSet</ref>
+			<ref type="application">JSONDelete</ref>
 		</see-also>
 	</application>
-	<application name="jsonset" language="en_US">
+	<application name="JSONSet" language="en_US" module="res_json">
 		<synopsis>
-			changes the value of an element in a json document
+			Changes the value of an element in a JSON document.
 		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 			<parameter name="path" required="true">
-				<para>path to the element whose value will change (like "/path/to/element", 
+				<para>Path to the element whose value will change (like "/path/to/element",
 				or "/path/to/element/3" to identify the element with index 3 in an array)</para>
 			</parameter>
 			<parameter name="value" required="true">
-				<para>the new value to be set; must be of the same type as the current value. for 
-				bool type elements any of the following 0, n, no, f, false or empty string (case 
+				<para>The new value to be set; must be of the same type as the current value. For
+				bool type elements any of the following 0, n, no, f, false or empty string (case
 				insensitive) are considered false, anything else is considered true</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>the first parameter is interpreted as a variable name, and its contents is 
-			considered to be a json document. the json document is parsed and the path is followed 
-			to the update point. the value of the element at the update point is changed to the given 
-			value. note that the new value will be the same type as the replaced value: for example 
-			if you try to replace a numeric value like 123 with a string value like abc, the 
-			variable type will be preserved and you will end up with a 0 instead of abc. you may 
-			change the value of boolean elements, numeric and string elements, but since the type is 
-			preserved, you cannot change the value of null or array elements. (you may change the 
-			value of an element insida an array though.) you may also change the value of an object 
-			element by using a json-proper value, but you have to be very careful with escaping the 
-			commas in this case... the contents of the json document variable is updated to reflect 
+			<para>The first parameter is interpreted as a variable name, and its contents is
+			considered to be a JSON document. The JSON document is parsed and the path is followed
+			to the update point. The value of the element at the update point is changed to the given
+			value. Note that the new value will be the same type as the replaced value: for example
+			if you try to replace a numeric value like 123 with a string value like abc, the
+			variable type will be preserved and you will end up with a 0 instead of abc. You may
+			change the value of boolean elements, numeric and string elements, but since the type is
+			preserved, you cannot change the value of null or array elements. (You may change the
+			value of an element insida an array though.) you may also change the value of an object
+			element by using a JSON-proper value, but you have to be very careful with escaping the
+			commas in this case... the contents of the JSON document variable is updated to reflect
 			the change.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonadd</ref>
-			<ref type="application">jsondelete</ref>
+			<ref type="application">JSONAdd</ref>
+			<ref type="application">JSONDelete</ref>
 		</see-also>
 	</application>
-	<application name="jsondelete" language="en_US">
+	<application name="JSONDelete" language="en_US" module="res_json">
 		<synopsis>
-			removes an element from a json document
+			Removes an element from a JSON document.
 		</synopsis>
 		<syntax>
 			<parameter name="jsonvarname" required="true">
-				<para>the name (not the contents!) of a variable that contains the json struct</para>
+				<para>The name (not the contents!) of a variable that contains the JSON struct</para>
 			</parameter>
 			<parameter name="path" required="true">
-				<para>path to the element will be added (like "/path/to/element", or 
-				"/path/to/element/3" to identify the element with index 3 in an array); if empty, 
+				<para>Path to the element will be added (like "/path/to/element", or
+				"/path/to/element/3" to identify the element with index 3 in an array); if empty,
 				the element becomes the root element</para>
 			</parameter>
 		</syntax>
 		<description>
-			<para>the first parameter is interpreted as a variable name, and its contents is 
-			considered to be a json document. the json document is parsed and the path is followed 
-			to the element that needs to be deleted. it is either pulled from the array, or dropped 
-			from the list of subelements.the contents of the json document variable is updated to 
+			<para>The first parameter is interpreted as a variable name, and its contents is
+			considered to be a JSON document. The JSON document is parsed and the path is followed
+			to the element that needs to be deleted. It is either pulled from the array, or dropped
+			from the list of subelements.the contents of the JSON document variable is updated to
 			reflect the change.</para>
 		</description>
 		<see-also>
-			<ref type="application">jsonadd</ref>
-			<ref type="application">jsonset</ref>
+			<ref type="application">JSONAdd</ref>
+			<ref type="application">JSONSet</ref>
 		</see-also>
 	</application>
  ***/
 
-static const char *app_jsonvariables = "jsonvariables";
-static const char *app_jsonadd = "jsonadd";
-static const char *app_jsonset = "jsonset";
-static const char *app_jsondelete = "jsondelete";
+static const char *app_jsonvariables = "JSONVariables";
+static const char *app_jsonadd = "JSONAdd";
+static const char *app_jsonset = "JSONSet";
+static const char *app_jsondelete = "JSONDelete";
 
 #define MAX_ASTERISK_VARLEN    4096
 
@@ -250,7 +243,7 @@ static void json_set_operation_result(struct ast_channel *chan, int result) {
 	pbx_builtin_setvar_helper(chan, "JSONRESULT", numresult);
 }
 
-static int jsonpretty_exec(struct ast_channel *chan, 
+static int jsonpretty_exec(struct ast_channel *chan,
 	const char *cmd, char *parse, char *buffer, size_t buflen
 ) {
 // nicely format the contents of a varable that contains json
@@ -282,13 +275,13 @@ static int jsonpretty_exec(struct ast_channel *chan,
 	char *pretty = cJSON_Print(doc);
 	ast_copy_string(buffer, pretty, buflen);
 	cJSON_Delete(doc);
-	free(pretty);
+	ast_free(pretty);
 	json_set_operation_result(chan, ASTJSON_OK);
 	return 0;
 
 }
 
-static int jsoncompress_exec(struct ast_channel *chan, 
+static int jsoncompress_exec(struct ast_channel *chan,
 	const char *cmd, char *parse, char *buffer, size_t buflen
 ) {
 // return a json string by stripping the unneeded characters (smallest footprint)
@@ -320,16 +313,16 @@ static int jsoncompress_exec(struct ast_channel *chan,
 	char *unpretty = cJSON_PrintUnformatted(doc);
 	ast_copy_string(buffer, unpretty, buflen);
 	cJSON_Delete(doc);
-	free(unpretty);
+	ast_free(unpretty);
 	json_set_operation_result(chan, ASTJSON_OK);
 	return 0;
 
 }
 
-static int jsonelement_exec(struct ast_channel *chan, 
+static int jsonelement_exec(struct ast_channel *chan,
 	const char *cmd, char *parse, char *buffer, size_t buflen
 ) {
-// searches for a json element found based on a path (like "/path/to/element/3/value")  
+// searches for a json element found based on a path (like "/path/to/element/3/value")
 //   and populates the element value and type with the contents of the element
 
 	json_set_operation_result(chan, ASTJSON_UNDECIDED);
@@ -391,26 +384,26 @@ static int jsonelement_exec(struct ast_channel *chan,
 		case cJSON_False: type = ast_strdupa("bool"); ast_copy_string(buffer, "0", buflen); break;
 		case cJSON_True: type = ast_strdupa("bool"); ast_copy_string(buffer, "1", buflen); break;
 		case cJSON_NULL: type = ast_strdupa("null"); ast_copy_string(buffer, "", buflen); break;
-		case cJSON_Number: 
-			type = ast_strdupa("number"); 
+		case cJSON_Number:
+			type = ast_strdupa("number");
 			if (thisobject->valuedouble > thisobject->valueint)
-				ast_asprintf(&value, "%f", thisobject->valuedouble); 
+				ast_asprintf(&value, "%f", thisobject->valuedouble);
 			else
-				ast_asprintf(&value, "%d", thisobject->valueint); 
-			ast_copy_string(buffer, value, buflen); 
-			free(value);
+				ast_asprintf(&value, "%d", thisobject->valueint);
+			ast_copy_string(buffer, value, buflen);
+			ast_free(value);
 			break;
-		case cJSON_String: 
-			type = ast_strdupa("string"); 
+		case cJSON_String:
+			type = ast_strdupa("string");
 			ast_copy_string(buffer, thisobject->valuestring, buflen);
 			break;
-		case cJSON_Array: 
-			type = ast_strdupa("array"); 
-			ast_copy_string(buffer, cJSON_PrintUnformatted(thisobject), buflen); 
+		case cJSON_Array:
+			type = ast_strdupa("array");
+			ast_copy_string(buffer, cJSON_PrintUnformatted(thisobject), buflen);
 			break;
-		case cJSON_Object: 
-			type = ast_strdupa("node"); 
-			ast_copy_string(buffer, cJSON_PrintUnformatted(thisobject), buflen); 
+		case cJSON_Object:
+			type = ast_strdupa("node");
+			ast_copy_string(buffer, cJSON_PrintUnformatted(thisobject), buflen);
 			break;
 	}
 	pbx_builtin_setvar_helper(chan, "JSONTYPE", type);
@@ -429,7 +422,7 @@ static int jsonvariables_exec(struct ast_channel *chan, const char *data) {
 //   Number, String: the number or the string
 //   Array: !array! (literal)
 //   Object: string, the json representation of the underlying object
-// note that this is mainly intended for simple key-value lists; if you have variables that are 
+// note that this is mainly intended for simple key-value lists; if you have variables that are
 //   arrays or objects, things may get screwed up because of the separators and braces...
 
 	json_set_operation_result(chan, ASTJSON_UNDECIDED);
@@ -440,7 +433,7 @@ static int jsonvariables_exec(struct ast_channel *chan, const char *data) {
 		AST_APP_ARG(json);
 	);
 	if (ast_strlen_zero(data)) {
-		ast_log(LOG_WARNING, "jsonvariables requires arguments (jsonsource)\n");
+		ast_log(LOG_WARNING, "JSONVariables requires arguments (jsonsource)\n");
 		json_set_operation_result(chan, ASTJSON_ARG_NEEDED);
 		return 0;
 	}
@@ -469,20 +462,20 @@ static int jsonvariables_exec(struct ast_channel *chan, const char *data) {
 				case cJSON_NULL: pbx_builtin_setvar_helper(chan, nvp->string, ""); break;
 				case cJSON_Number:
 					if (nvp->valuedouble > nvp->valueint)
-						ast_asprintf(&num, "%f", nvp->valuedouble); 
+						ast_asprintf(&num, "%f", nvp->valuedouble);
 					else
-						ast_asprintf(&num, "%d", nvp->valueint); 
-					pbx_builtin_setvar_helper(chan, nvp->string, num); 
-					free(num);
+						ast_asprintf(&num, "%d", nvp->valueint);
+					pbx_builtin_setvar_helper(chan, nvp->string, num);
+					ast_free(num);
 					break;
 				case cJSON_String: pbx_builtin_setvar_helper(chan, nvp->string, nvp->valuestring); break;
 				case cJSON_Array: pbx_builtin_setvar_helper(chan, nvp->string, "!array!"); break;
-				case cJSON_Object: 
+				case cJSON_Object:
 					eljson = cJSON_PrintUnformatted(nvp);
-					pbx_builtin_setvar_helper(chan, nvp->string, eljson); 
-					free(eljson);
+					pbx_builtin_setvar_helper(chan, nvp->string, eljson);
+					ast_free(eljson);
 					break;
-				default: 
+				default:
 					break;
 			}
 		}
@@ -497,7 +490,7 @@ static int jsonvariables_exec(struct ast_channel *chan, const char *data) {
 static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 // add an element of a certain type into a json structure, at the path indicated
 // accepted types are bool, null, number, string or array
-// the value parameter is ignored for null and array types; boolean false are represented by an 
+// the value parameter is ignored for null and array types; boolean false are represented by an
 //    empty string, 0, n, no, f or false (case insensitive) - anything else is considered true
 // if the element at the path is an array, append to the array (in this case the name is ignored)
 // rewrite the contents of the variable that contains the json doc and set an error code variable
@@ -514,7 +507,7 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 		AST_APP_ARG(value);
 	);
 	if (ast_strlen_zero(data)) {
-		ast_log(LOG_WARNING, "jsonadd requires arguments (jsonvarname,path,type,name,value)\n");
+		ast_log(LOG_WARNING, "JSONAdd requires arguments (jsonvarname,path,type,name,value)\n");
 		json_set_operation_result(chan, ASTJSON_ARG_NEEDED);
 		return 0;
 	}
@@ -540,10 +533,10 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 		// get the element type
 		if (strcasecmp(args.type, "bool") == 0)
 			newobject = (
-				(args.value == 0) || (strlen(args.value) == 0) || 
+				(args.value == 0) || (strlen(args.value) == 0) ||
 				(strcasecmp(args.value, "0") == 0) ||
 				(strcasecmp(args.value, "no") == 0) || (strcasecmp(args.value, "n") == 0) ||
-				(strcasecmp(args.value, "false") == 0) || (strcasecmp(args.value, "f") == 0) 
+				(strcasecmp(args.value, "false") == 0) || (strcasecmp(args.value, "f") == 0)
 			) ? cJSON_CreateFalse() : cJSON_CreateTrue();
 		else if (strcasecmp(args.type, "null") == 0)
 			newobject = cJSON_CreateNull();
@@ -566,7 +559,7 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 	cJSON *doc; char *thispath;
 	const char *jsondoc = pbx_builtin_getvar_helper(chan, args.json);
 	if ((jsondoc == 0) || (strlen(jsondoc) == 0)) {
-		// variable containing document is missing or empty string, 
+		// variable containing document is missing or empty string,
 		// it needs to be initialized as either {} or []
 		doc = (ast_strlen_zero(args.name)) ? cJSON_CreateArray() : cJSON_CreateObject();
 		thispath = "\0";
@@ -599,18 +592,18 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 			break;
 		}
 	} else {
-		cJSON *thisobject = doc; cJSON *nextobject = NULL; 
+		cJSON *thisobject = doc; cJSON *nextobject = NULL;
 		int ixarray;
 		char *pathpiece = strsep(&thispath, "/");
 		while (pathpiece) {
-			ast_log(LOG_DEBUG, "on element %s... ", pathpiece);			
+			ast_log(LOG_DEBUG, "on element %s... ", pathpiece);
 			// determine if we have an object with the given name or index
 			if (sscanf(pathpiece, "%3d", &ixarray) == 1)
 				nextobject = cJSON_GetArrayItem(thisobject, ixarray);
 			else
 				nextobject = cJSON_GetObjectItem(thisobject, pathpiece);
 			if (nextobject == NULL) break; // path element not found
-			ast_log(LOG_DEBUG, "object is:\n%s\n", cJSON_PrintUnformatted(nextobject));			
+			ast_log(LOG_DEBUG, "object is:\n%s\n", cJSON_PrintUnformatted(nextobject));
 			pathpiece = strsep(&thispath, "/");
 			if (pathpiece == NULL) {
 				// done going down the path, add object here
@@ -639,7 +632,7 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 		pbx_builtin_setvar_helper(chan, args.json, jsonresult);
 	// cleanup the mess and let's get outta here
 	ast_log(LOG_DEBUG, "resulting json: %s\n", jsonresult);
-	free(jsonresult);
+	ast_free(jsonresult);
 	cJSON_Delete(doc);
 	json_set_operation_result(chan, ret);
 	return 0;
@@ -647,11 +640,11 @@ static int jsonadd_exec(struct ast_channel *chan, const char *data) {
 }
 
 static int jsonset_exec(struct ast_channel *chan, const char *data) {
-// sets the value of the element at the path indicated (like "/path/to/element/3/value") 
+// sets the value of the element at the path indicated (like "/path/to/element/3/value")
 // the new value must be of the same type as the existing element. you cannot set the value of
-//    existing null elements, or array elements: you can only delete or add them (then for the 
+//    existing null elements, or array elements: you can only delete or add them (then for the
 //    arrays you would need to add the elements with repeated "add" operations)
-// regarding boolean values to be set, false is represented by an empty string, 0, n, no, f or false 
+// regarding boolean values to be set, false is represented by an empty string, 0, n, no, f or false
 //    (case insensitive) - anything else is considered true
 // rewrite the contents of the variable that contains the json source and set an error code variable
 
@@ -665,7 +658,7 @@ static int jsonset_exec(struct ast_channel *chan, const char *data) {
 		AST_APP_ARG(value);
 	);
 	if (ast_strlen_zero(data)) {
-		ast_log(LOG_WARNING, "jsonset requires arguments (jsonvarname,path,value)\n");
+		ast_log(LOG_WARNING, "JSONSet requires arguments (jsonvarname,path,value)\n");
 		json_set_operation_result(chan, ASTJSON_ARG_NEEDED);
 		return 0;
 	}
@@ -704,7 +697,7 @@ static int jsonset_exec(struct ast_channel *chan, const char *data) {
 		json_set_operation_result(chan, ASTJSON_NOTFOUND);
 		return 0;
 	}
-	cJSON *thisobject = doc; cJSON *nextobject = NULL; cJSON *newobject = NULL; 
+	cJSON *thisobject = doc; cJSON *nextobject = NULL; cJSON *newobject = NULL;
 	int ixarray;
 	char *pathpiece = strsep(&thispath, "/");
 	while (pathpiece) {
@@ -722,10 +715,10 @@ static int jsonset_exec(struct ast_channel *chan, const char *data) {
 			case cJSON_False:
 			case cJSON_True:
 				newobject = (
-					(args.value == 0) || (strlen(args.value) == 0) || 
+					(args.value == 0) || (strlen(args.value) == 0) ||
 					(strcasecmp(args.value, "0") == 0) ||
 					(strcasecmp(args.value, "no") == 0) || (strcasecmp(args.value, "n") == 0) ||
-					(strcasecmp(args.value, "false") == 0) || (strcasecmp(args.value, "f") == 0) 
+					(strcasecmp(args.value, "false") == 0) || (strcasecmp(args.value, "f") == 0)
 				) ? cJSON_CreateFalse() : cJSON_CreateTrue();
 				break;
 			case cJSON_NULL:
@@ -764,7 +757,7 @@ static int jsonset_exec(struct ast_channel *chan, const char *data) {
 	if (ret == ASTJSON_OK)
 		pbx_builtin_setvar_helper(chan, args.json, jsonresult);
 	// cleanup the mess and let's get outta here
-	free(jsonresult);
+	ast_free(jsonresult);
 	cJSON_Delete(doc);
 	json_set_operation_result(chan, ret);
 	return 0;
@@ -772,7 +765,7 @@ static int jsonset_exec(struct ast_channel *chan, const char *data) {
 }
 
 static int jsondelete_exec(struct ast_channel *chan, const char *data) {
-// delete a json element in a path (like "/path/to/element/3/value")  
+// delete a json element in a path (like "/path/to/element/3/value")
 // rewrite the contents of the variable that contains the json source and set an error code variable
 
 	json_set_operation_result(chan, ASTJSON_UNDECIDED);
@@ -784,7 +777,7 @@ static int jsondelete_exec(struct ast_channel *chan, const char *data) {
 		AST_APP_ARG(path);
 	);
 	if (ast_strlen_zero(data)) {
-		ast_log(LOG_WARNING, "jsondelete requires arguments (jsonvarname,path)\n");
+		ast_log(LOG_WARNING, "JSONDelete requires arguments (jsonvarname,path)\n");
 		json_set_operation_result(chan, ASTJSON_ARG_NEEDED);
 		return 0;
 	}
@@ -856,8 +849,8 @@ static int jsondelete_exec(struct ast_channel *chan, const char *data) {
 	// regenerate the source json
 	char *jsonresult = cJSON_PrintUnformatted(doc);
 	if (ret == ASTJSON_OK)
-		pbx_builtin_setvar_helper(chan, args.jsonvarname, jsonresult); 
-	free(jsonresult);
+		pbx_builtin_setvar_helper(chan, args.jsonvarname, jsonresult);
+	ast_free(jsonresult);
 	cJSON_Delete(doc);
 	json_set_operation_result(chan, ret);
 	return 0;
@@ -901,4 +894,4 @@ static int unload_module(void) {
 	return ret;
 }
 
-AST_MODULE_INFO_STANDARD(ASTERISK_GPL_KEY, "json parser and builder functions");
+AST_MODULE_INFO_STANDARD(ASTERISK_GPL_KEY, "JSON string manipulation functions and applications");
